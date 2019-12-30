@@ -1,6 +1,6 @@
 **You can easly submit your google form as many times as you want**
 
-> How to:
+### How to:
  - Proceed to completing the survey
  - Click F12
  - Complete the survey and send answers
