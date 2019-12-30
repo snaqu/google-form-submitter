@@ -22,6 +22,45 @@ const App = () => {
     }
   ]);
 
+  const onFormSubmit = e => {
+    e.preventDefault();
+    setIsModalOpen(true);
+    setIsResponseDone(false);
+    setResponseMessage(messages.sending);
+
+    let objectWithValues = {};
+
+    formValue.forEach(({ entryValue, value }) => {
+      objectWithValues = {
+        ...objectWithValues,
+        [entryValue]: value
+      };
+    });
+
+    const query = queryString.stringify(objectWithValues);
+    const spreadsheetUrl = `https://docs.google.com/forms/${linkValue}/formResponse?${query}&submit=Submit`;
+    const corsUrl = "https://cors-anywhere.herokuapp.com/";
+
+    (async () => {
+      let promiseArray = [];
+
+      for (let i = 0; i < submittionValue; i++) {
+        const response = await fetch(`${corsUrl}${spreadsheetUrl}`);
+        if (response.ok) {
+          promiseArray.push(response);
+        } else {
+          setIsResponseDone(true);
+          return setResponseMessage(messages.sendingError);
+        }
+      }
+
+      Promise.all(promiseArray).then(() => {
+        setResponseMessage(messages.sendingCompleted);
+        setIsResponseDone(true);
+      });
+    })();
+  };
+
   const entryInputs = formValue.map((item, key) => (
     <ConnectedInputs
       key={item.id}
@@ -85,57 +124,21 @@ const App = () => {
             <li>Complete the survey and send answers</li>
             <li>Go to the network tab in devtools</li>
             <li>
-              Find the line with the name "form response", click on it and go to
-              the bottom
+              Find the line with the name{" "}
+              <em className="text-indigo-600 font-bold">form response</em>,
+              click on it and go to the bottom
             </li>
-            <li>In the "Form Data" tab there are answers to the form</li>
+            <li>
+              In the <em className="text-indigo-600 font-bold">Form Data</em>{" "}
+              tab there are answers to the form
+            </li>
             <li>
               Paste them into the inputs below and select the number of
               submittions
             </li>
           </ol>
         </div>
-        <form
-          className="w-full"
-          onSubmit={e => {
-            e.preventDefault();
-            setIsModalOpen(true);
-            setIsResponseDone(false);
-            setResponseMessage(messages.sending);
-
-            let objectWithValues = {};
-
-            formValue.forEach(({ entryValue, value }) => {
-              objectWithValues = {
-                ...objectWithValues,
-                [entryValue]: value
-              };
-            });
-
-            const query = queryString.stringify(objectWithValues);
-            const spreadsheetUrl = `https://docs.google.com/forms/${linkValue}/formResponse?${query}&submit=Submit`;
-            const corsUrl = "https://cors-anywhere.herokuapp.com/";
-
-            (async () => {
-              let promiseArray = [];
-
-              for (let i = 0; i < submittionValue; i++) {
-                const response = await fetch(`${corsUrl}${spreadsheetUrl}`);
-                if (response.ok) {
-                  promiseArray.push(response);
-                } else {
-                  setIsResponseDone(true);
-                  return setResponseMessage(messages.sendingError);
-                }
-              }
-
-              Promise.all(promiseArray).then(() => {
-                setResponseMessage(messages.sendingCompleted);
-                setIsResponseDone(true);
-              });
-            })();
-          }}
-        >
+        <form className="w-full" onSubmit={e => onFormSubmit(e)}>
           <div className="flex flex-wrap -mx-3 mb-5">
             <EntryInput
               name="Link"
