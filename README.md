@@ -1,4 +1,4 @@
-**You can easly submit your google form as many times as you want**
+## You can easly submit your google form as many times as you want**
 
 ### How to:
  - Proceed to completing the survey
