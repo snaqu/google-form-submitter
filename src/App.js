@@ -42,7 +42,7 @@ const App = () => {
     const corsUrl = "https://cors-anywhere.herokuapp.com/";
 
     (async () => {
-      let promiseArray = [];
+      const promiseArray = [];
 
       for (let i = 0; i < submittionValue; i++) {
         const response = await fetch(`${corsUrl}${spreadsheetUrl}`);
@@ -67,7 +67,7 @@ const App = () => {
       item={item}
       number={key}
       onChangeEntry={e => {
-        const value = e.target.value;
+        const { value } = e.target;
         setFormValue(currentFormValues =>
           produce(currentFormValues, v => {
             v[key].entryValue = value;
@@ -75,7 +75,7 @@ const App = () => {
         );
       }}
       onChangeValue={e => {
-        const value = e.target.value;
+        const { value } = e.target;
         setFormValue(currentFormValues =>
           produce(currentFormValues, v => {
             v[key].value = value;
