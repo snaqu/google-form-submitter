@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import uuidv4 from "uuid/v4";
 import produce from "immer";
-import queryString from "query-string";
 import Modal from "react-responsive-modal";
+import axios from "axios";
 
 import messages from "./messages/messages";
 import ConnectedInputs from "./components/molecules/connectedInputs";
@@ -28,37 +28,32 @@ const App = () => {
     setIsResponseDone(false);
     setResponseMessage(messages.sending);
 
-    let objectWithValues = {};
+    const formData = new FormData();
+    const spreadsheetUrl = `https://docs.google.com/forms/${linkValue}/formResponse`;
+    const corsUrl = "https://cors-anywhere.herokuapp.com/";
+    const promiseArray = [];
 
     formValue.forEach(({ entryValue, value }) => {
-      objectWithValues = {
-        ...objectWithValues,
-        [entryValue]: value
-      };
+      formData.set(entryValue, value);
     });
 
-    const query = queryString.stringify(objectWithValues);
-    const spreadsheetUrl = `https://docs.google.com/forms/${linkValue}/formResponse?${query}&submit=Submit`;
-    const corsUrl = "https://cors-anywhere.herokuapp.com/";
+    for (let i = 0; i < submittionValue; i++) {
+      promiseArray.push(
+        axios({
+          method: "post",
+          url: `${corsUrl}${spreadsheetUrl}`,
+          data: formData,
+          headers: { "Content-Type": "multipart/form-data" }
+        })
+      );
+    }
 
-    (async () => {
-      const promiseArray = [];
+    // TODO: handle errors for request.
 
-      for (let i = 0; i < submittionValue; i++) {
-        const response = await fetch(`${corsUrl}${spreadsheetUrl}`);
-        if (response.ok) {
-          promiseArray.push(response);
-        } else {
-          setIsResponseDone(true);
-          return setResponseMessage(messages.sendingError);
-        }
-      }
-
-      Promise.all(promiseArray).then(() => {
-        setResponseMessage(messages.sendingCompleted);
-        setIsResponseDone(true);
-      });
-    })();
+    Promise.all(promiseArray).then(() => {
+      setResponseMessage(messages.sendingCompleted);
+      setIsResponseDone(true);
+    });
   };
 
   const entryInputs = formValue.map((item, key) => (
@@ -161,7 +156,7 @@ const App = () => {
                   setSubmittionValue(currentValue);
                 }
               }}
-              labelValue="Number of submittions"
+              labelValue="Number of submittions (More than 10 might contribute to block)"
               fullWidth
               placeholder="7"
             />
