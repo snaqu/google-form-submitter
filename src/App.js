@@ -45,15 +45,20 @@ const App = () => {
           data: formData,
           headers: { "Content-Type": "multipart/form-data" }
         })
+          .then(response => Promise.resolve(response))
+          .catch(error => Promise.reject(error.response))
       );
     }
 
-    // TODO: handle errors for request.
-
-    Promise.all(promiseArray).then(() => {
-      setResponseMessage(messages.sendingCompleted);
-      setIsResponseDone(true);
-    });
+    Promise.all(promiseArray)
+      .then(() => {
+        setIsResponseDone(true);
+        setResponseMessage(messages.sendingCompleted);
+      })
+      .catch(() => {
+        setIsResponseDone(true);
+        setResponseMessage(messages.sendingError);
+      });
   };
 
   const entryInputs = formValue.map((item, key) => (
