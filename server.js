@@ -9,10 +9,10 @@ app.use(favicon(`${__dirname}/build/favicon.ico`));
 // the __dirname is the current directory from where the script is running
 app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, "build")));
-app.get("/ping", function(req, res) {
+app.get("/ping", (_, res) => {
   return res.send("pong");
 });
-app.get("/*", function(req, res) {
+app.get("/*", (_, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 app.listen(port);
